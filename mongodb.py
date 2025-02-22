@@ -1,9 +1,10 @@
 import pymongo
 from datetime import datetime
 from slugify import slugify
+import os
 
 # Connect to MongoDB
-client = pymongo.MongoClient("mongodb+srv://george:hack1r3land@cluster0.uf8bs.mongodb.net/")  # Replace with your MongoDB URI
+client = pymongo.MongoClient(os.environ.get("MONGODB_URI")) 
 db = client["william"]
 articles_collection = db["articles"]
 

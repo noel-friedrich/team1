@@ -29,7 +29,7 @@ workflow = StateGraph(state_schema=MessagesState)
 config = {"configurable": {"thread_id": "abc123224"}}
 
 # MongoDB connection setup
-client = pymongo.MongoClient("mongodb+srv://george:hack1r3land@cluster0.uf8bs.mongodb.net/")  # Replace with your MongoDB URI
+client = pymongo.MongoClient(os.environ.get("MONGODB_URI"))  # Get MongoDB URI from environment variable
 db = client["william"]
 articles_collection = db["articles"]
 
