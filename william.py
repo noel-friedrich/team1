@@ -11,8 +11,11 @@ if not os.environ.get("OPENAI_API_KEY"):
 
 from langchain.chat_models import init_chat_model
 from langchain.output_parsers import ResponseSchema, StructuredOutputParser
-from langchain.prompts import ChatPromptTemplate, HumanMessagePromptTemplate
-from langchain.chat_models import ChatOpenAI
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_openai import ChatOpenAI
+from langchain.chains import create_extraction_chain
+from pydantic import BaseModel, Field
+from typing import TypedDict, Annotated
 
 model = init_chat_model("gpt-4o-mini", model_provider="openai")
 
@@ -35,45 +38,42 @@ response_schemas = [
 ]
 output_parser = StructuredOutputParser.from_response_schemas(response_schemas)
 
+# Define the schema for article extraction
+class Article(BaseModel):
+    """Schema for article generation."""
+    topic: str = Field(description="The main topic or title of the article")
+    content: str = Field(description="The full article content")
+
+# Define the output structure
+class ArticleOutput(TypedDict):
+    topic: str
+    content: str
+
 # Define the function that calls the model
 def call_model(state: MessagesState):
-    # Configure the model to use function calling
-    model = ChatOpenAI(
+    # Configure the model with the latest API
+    llm = ChatOpenAI(
         model="gpt-4o-mini",
-        temperature=0.7,
-        functions=[{
-            "name": "write_article",
-            "description": "Write an article with a clear topic and content",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "topic": {
-                        "type": "string",
-                        "description": "The main topic or title of the article"
-                    },
-                    "content": {
-                        "type": "string",
-                        "description": "The full article content"
-                    }
-                },
-                "required": ["topic", "content"]
-            }
-        }],
-        function_call={"name": "write_article"}
-    )
+        temperature=0.7
+    ).with_structured_output(ArticleOutput)
     
-    response = model.invoke(state["messages"])
+    # Create the prompt template
+    prompt = ChatPromptTemplate.from_messages([
+        MessagesPlaceholder(variable_name="messages"),
+        ("system", "Extract the article topic and content. Ensure the topic is concise and the content is detailed.")
+    ])
     
-    # Extract the structured output
-    function_args = json.loads(response.additional_kwargs["function_call"]["arguments"])
-    topic = function_args["topic"]
-    content = function_args["content"]
+    # Create and invoke the chain
+    chain = prompt | llm
+    
+    # Get structured output
+    extracted = chain.invoke({"messages": state["messages"]})
     
     # Store the article in MongoDB
     article_data = {
-        "title": topic,
-        "content": content,
-        "slug": slugify(topic) or f"untitled-{datetime.now()}",  # Fallback slug
+        "title": extracted["topic"],
+        "content": extracted["content"],
+        "slug": slugify(extracted["topic"]) or f"untitled-{datetime.now()}",
         "image_url": "https://example.com/hello-world.jpg",
         "timestamp": datetime.now(),
         "metadata": {
@@ -98,7 +98,7 @@ def call_model(state: MessagesState):
     except pymongo.errors.PyMongoError as e:
         print(f"MongoDB Error: {str(e)}")
     
-    return {"messages": response}
+    return {"messages": [HumanMessage(content=extracted["content"])]}
 
 def generate_next_prompt(previous_output):
     next_prompt = f"""Based on your previous article about: {previous_output}
