@@ -5,6 +5,8 @@ import pymongo
 from datetime import datetime
 from slugify import slugify
 import json
+from openai import OpenAI
+import numpy as np
 
 if not os.environ.get("OPENAI_API_KEY"):
   os.environ["OPENAI_API_KEY"] = getpass.getpass("Enter API key for OpenAI: ")
@@ -24,7 +26,7 @@ from langgraph.graph import START, MessagesState, StateGraph
 
 # Define a new graph
 workflow = StateGraph(state_schema=MessagesState)
-config = {"configurable": {"thread_id": "abc1234"}}
+config = {"configurable": {"thread_id": "abc123224"}}
 
 # MongoDB connection setup
 client = pymongo.MongoClient("mongodb+srv://george:hack1r3land@cluster0.uf8bs.mongodb.net/")  # Replace with your MongoDB URI
@@ -49,8 +51,18 @@ class ArticleOutput(TypedDict):
     topic: str
     content: str
 
-# Define the function that calls the model
+def get_embedding(text: str, client: OpenAI) -> list[float]:
+    """Get embedding for a text using OpenAI's text-embedding-ada-002 model"""
+    response = client.embeddings.create(
+        model="text-embedding-ada-002",
+        input=text
+    )
+    return response.data[0].embedding
+
 def call_model(state: MessagesState):
+    # Initialize OpenAI client
+    client = OpenAI()
+    
     # Configure the model with the latest API
     llm = ChatOpenAI(
         model="gpt-4o-mini",
@@ -69,30 +81,66 @@ def call_model(state: MessagesState):
     # Get structured output
     extracted = chain.invoke({"messages": state["messages"]})
     
+    # Generate embeddings for title and content
+    title_embedding = get_embedding(extracted["topic"], client)
+    content_embedding = get_embedding(extracted["content"], client)
+    
     # Store the article in MongoDB
     article_data = {
         "title": extracted["topic"],
         "content": extracted["content"],
         "slug": slugify(extracted["topic"]) or f"untitled-{datetime.now()}",
-        "image_url": "https://example.com/hello-world.jpg",
-        "timestamp": datetime.now(),
+        "image_url": "https://picsum.photos/200",
+        "createdAt": datetime.now(),
         "metadata": {
             "model": "gpt-4o-mini",
             "thread_id": config["configurable"]["thread_id"]
         },
         "votes": 1,
+        # Add vector embeddings
+        "title_embedding": title_embedding,
+        "content_embedding": content_embedding
     }
     
     try:
         # Insert and get the inserted ID
         result = articles_collection.insert_one(article_data)
         
+        # Create vector search index if it doesn't exist
+        try:
+            articles_collection.create_search_index(
+                "vector_index",
+                "vectorSearch",
+                {
+                    "fields": [
+                        {
+                            "type": "vector",
+                            "path": "title_embedding",
+                            "numDimensions": 1536,
+                            "similarity": "dotProduct",
+                            "quantization": "scalar"
+                        },
+                        {
+                            "type": "vector",
+                            "path": "content_embedding",
+                            "numDimensions": 1536,
+                            "similarity": "dotProduct",
+                            "quantization": "scalar"
+                        }
+                    ]
+                }
+            )
+        except Exception as e:
+            # Index might already exist
+            print(f"Note: Vector index creation attempt: {str(e)}")
+        
         # Verify the insertion by fetching the document
         inserted_doc = articles_collection.find_one({"_id": result.inserted_id})
         print("\n=== MongoDB Insertion Test ===")
         print(f"Document inserted with ID: {result.inserted_id}")
         print(f"Verification - Found document title: {inserted_doc['title']}")
-        print(f"Document timestamp: {inserted_doc['timestamp']}")
+        print(f"Document timestamp: {inserted_doc['createdAt']}")
+        print("Vector embeddings added for title and content")
         print("===========================\n")
         
     except pymongo.errors.PyMongoError as e:
