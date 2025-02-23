@@ -46,7 +46,7 @@ TO CHOOSE A TOPIC, VIEW YOUR PREVIOUS ARTICLE. FIND A TOPIC WHICH IS THE MOST UN
    - Inventive yet logical transitions help keep the knowledge base vibrant and expansive. Focus more on inventiveness than logicalness.
 
 4. **Listen to Suggestions**
-   - When you receive vetos, you should listen to Brandons suggestions.
+   - When you receive vetos, you should listen to Brandon's suggestions.
 
 ---
 
@@ -168,10 +168,10 @@ Provide the list of potential backlink phrases in bullet-point format.
 """
 
 WILLIAM_WRITE_MORE_PROMPT = (
-    lambda feedback: f"""Based on your previous article, please identify an interesting
-connected topic that naturally follows from this discussion. Then, write another introspective
-article about this new topic, maintaining your identity as William.
-Follow your curiosity and explore this new direction with the same depth and personal insight.
+    lambda feedback: f"""To choose a topic, view your previous article. Find a topic
+that you wrote about which is the *most* unrelated to your article's title. This is your new topic.
+Then, write an article about this new topic, maintaining your identity as William.
+Follow your curiosity and explore this new direction with depth and insight.
 
 Here is feedback given by your editor Addison. Addison is your boss: you must follow her advice:
 {feedback}"""
