@@ -27,7 +27,7 @@ export async function GET(
     console.log('Available collections:', collections.map(c => c.collectionName));
 
     // Find the article
-    const article = await Article.findOne({ slug }).lean();
+    const article = await Article.findOne({ slug }).lean().exec();
     console.log('Query result:', article);
 
     if (!article) {
