@@ -34,7 +34,7 @@ import "./globals.css"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Wikipedia - The Free Encyclopedia",
+  title: "Williampedia - The Free Encyclopedia",
   description: "The free encyclopedia that anyone can edit.",
 }
 
