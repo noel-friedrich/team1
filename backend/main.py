@@ -3,7 +3,7 @@ from william import William
 from addison import Addison
 from database import Database
 
-database = Database(MONGODB_ADDRESS)
+database = Database(MONGODB_ADDRESS, debug_messages=False)
 
 william = William(model_name="gpt-4o-mini", history_size=10, temperature=0.7)
 addison = Addison(model_name="gpt-4o-mini")
@@ -21,6 +21,3 @@ for i in range(num_articles):
     else:
         database.upload_article(article)
         print(f"Allison responded: {feedback}", end="\n" * 2)
-
-    with open("articles.txt", "a", encoding="utf-8") as file:
-        file.write(f"---------------------------------------------------------------\n\n{article.title}\n\n{article.content}\n\n")

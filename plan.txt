@@ -1,8 +1,0 @@
-PLAN:
-- William prompt cycle
-- Adversarial Model (Dorothy)
-- Setup article database (wiki) that william can query
-  -> probably smart to do a vector database
-- Build frontend to show williampedia which updates every hour
-  -> register williampedia.com
-- Twitch Chat?
