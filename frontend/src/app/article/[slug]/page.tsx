@@ -208,7 +208,7 @@ export default async function ArticlePage({
                   </Card>
                 )}
 
-                {/* Article Title */}
+                {/* Article Titl32e */}
                 <h1 className="text-[2rem] font-serif mb-4">{article.title}</h1>
 
                 {/* Article Image */}
