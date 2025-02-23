@@ -143,7 +143,7 @@ class VideoStreamer:
         self.height = height
         self.fps = fps
         self.bottom_margin = bottom_margin
-        # Soft white background.
+        # Use a soft white background.
         self.bg_color = (245, 245, 245)
         # Text color is black.
         self.font_color = (0, 0, 0)
@@ -154,6 +154,9 @@ class VideoStreamer:
         self.line_margin = 10
         self.current_offset = 0
 
+        # We'll maintain an accumulated text string across prompts.
+        self.accumulated_text = ""
+
         if self.stream_mode:
             if stream_url is None:
                 raise ValueError(
@@ -163,6 +166,8 @@ class VideoStreamer:
         else:
             self.process = None
             cv2.namedWindow("Live Stream", cv2.WINDOW_NORMAL)
+            # Optionally set fullscreen here if desired:
+            # cv2.setWindowProperty("Live Stream", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
 
     def _start_ffmpeg(self, stream_url):
         ffmpeg_cmd = [
@@ -190,72 +195,75 @@ class VideoStreamer:
         ]
         return subprocess.Popen(ffmpeg_cmd, stdin=subprocess.PIPE)
 
-    def stream_text(self, text, chars_per_sec=50, average_chars_per_line=50):
+    def append_text(self, new_text, chars_per_sec=50):
         """
-        Reveals markdown-formatted text gradually with a typewriter effect.
-        The markdown is preprocessed so that:
-          - Headers (lines beginning with '#') are transformed into "HEADERn:" markers.
-          - Inline **bold** and *italic* segments are rendered using the italic font.
-        For header lines, the header is rendered using the bold font.
-        Dynamic scroll speed is computed based on window height and chars_per_sec.
-        """
-        processed_text = preprocess_markdown(text)
-        full_text = processed_text
-        text_buffer = ""
-        index = 0
-        char_accumulator = 0.0
-        delay = 1.0 / self.fps
+        Appends new markdown-formatted text to the accumulated text and animates
+        the revealing of the new portion. The previous text remains on screen.
 
-        # Pre-calculate final layout (using base font for wrapping).
-        final_lines = layout_text(
-            full_text, self.base_font, self.width - 2 * self.x_margin
+        To optimize performance as the text grows, we clip the accumulated text to
+        a maximum length (CLIP_THRESHOLD). This way, only a limited amount of text
+        is re-laid out each frame.
+
+        The reveal speed is time-based so that the new characters appear at a constant rate.
+        """
+        CLIP_THRESHOLD = (
+            3000  # maximum number of characters to retain in the accumulated text
         )
 
-        # Compute dynamic scroll speed (pixels per frame):
-        dynamic_scroll_speed = (
-            (chars_per_sec / average_chars_per_line)
-            * (self.line_height + self.line_margin)
-        ) / self.fps
+        # Process the new markdown text.
+        processed_new_text = preprocess_markdown(new_text)
+        prev_length = len(self.accumulated_text)
+        # Append a newline if there is already text.
+        if self.accumulated_text:
+            self.accumulated_text += "\n" + processed_new_text
+        else:
+            self.accumulated_text = processed_new_text
+        new_total = len(self.accumulated_text)
 
-        while index < len(full_text):
-            char_accumulator += chars_per_sec / self.fps
-            num_to_add = int(char_accumulator)
-            if num_to_add > 0:
-                text_buffer += full_text[index : index + num_to_add]
-                index += num_to_add
-                char_accumulator -= num_to_add
+        # If the accumulated text is too long, clip it.
+        if new_total > CLIP_THRESHOLD:
+            # Keep only the last CLIP_THRESHOLD characters.
+            self.accumulated_text = self.accumulated_text[-CLIP_THRESHOLD:]
+            # Adjust prev_length accordingly.
+            prev_length = max(0, prev_length - (new_total - CLIP_THRESHOLD))
+            new_total = len(self.accumulated_text)
 
-            # Calculate layout for the current text.
+        # Animate revealing only the new portion.
+        start_time = time.time()
+        delay = 1.0 / self.fps
+
+        while True:
+            elapsed = time.time() - start_time
+            # Calculate how many characters into the new portion we should be.
+            target_index = prev_length + min(
+                new_total - prev_length, int(chars_per_sec * elapsed)
+            )
+            text_buffer = self.accumulated_text[:target_index]
+
+            # Compute layout only on the (clipped) accumulated text.
             lines = layout_text(
                 text_buffer, self.base_font, self.width - 2 * self.x_margin
             )
             total_text_height = len(lines) * (self.line_height + self.line_margin)
             available_height = self.height - self.y_offset - self.bottom_margin
             target_offset = max(0, total_text_height - available_height)
+            # For simplicity, we directly set the scroll offset.
+            self.current_offset = target_offset
 
-            if self.current_offset < target_offset:
-                self.current_offset = min(
-                    self.current_offset + dynamic_scroll_speed, target_offset
-                )
-            elif self.current_offset > target_offset:
-                self.current_offset = target_offset
-
-            # Create a new image and draw each line.
+            # Create an image and render the visible portion of the layout.
             img = Image.new("RGB", (self.width, self.height), color=self.bg_color)
             draw = ImageDraw.Draw(img)
             current_y = self.y_offset - self.current_offset
             for line in lines:
-                # Determine which fonts to use for this line.
                 reg_font, ital_font, display_line = get_fonts_for_line(
                     line, self.base_font
                 )
-                # Draw the line with inline markdown formatting.
                 draw_markdown_text(
                     draw, self.x_margin, current_y, display_line, reg_font, ital_font
                 )
-                # Advance current_y by the height of the used font plus margin.
                 line_h = reg_font.getsize("A")[1]
                 current_y += line_h + self.line_margin
+
             frame = np.array(img)
             frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
 
@@ -267,9 +275,14 @@ class VideoStreamer:
                     return
 
             time.sleep(delay)
-        self.current_offset = 0
+            if target_index >= new_total:
+                break
+        # After finishing, leave the final frame on screen.
 
     def display_black_screen(self, duration=BLACK_SCREEN_DURATION):
+        """
+        Displays a black screen for the specified duration.
+        """
         img = Image.new("RGB", (self.width, self.height), color=self.bg_color)
         frame = np.array(img)
         frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
@@ -284,6 +297,9 @@ class VideoStreamer:
                     return
 
     def close(self):
+        """
+        Closes resources: the FFmpeg process or the OpenCV window.
+        """
         if self.stream_mode:
             self.process.stdin.close()
             self.process.wait()
