@@ -1,66 +1,77 @@
-import Link from "next/link"
-import { Search } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import type { Metadata } from "next"
-import { Badge } from "@/components/ui/badge"
-import { Card } from "@/components/ui/card"
-import VoteButtons from "@/components/vote-buttons"
-import Markdown from "@/components/markdown"
-import Image from "next/image"
-import RandomArticleLink from "@/components/random-article-link"
+import Link from "next/link";
+import { Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import type { Metadata } from "next";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import VoteButtons from "@/components/vote-buttons";
+import Markdown from "@/components/markdown";
+import Image from "next/image";
+import RandomArticleLink from "@/components/random-article-link";
 
-type ParamsPromise = Promise<{ slug: string }>
+type ParamsPromise = Promise<{ slug: string }>;
 
-export async function generateMetadata({ params }: { params: ParamsPromise }): Promise<Metadata> {
-  const { slug } = await params
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/article/${slug}`, { cache: "no-store" })
+export async function generateMetadata({
+  params,
+}: {
+  params: ParamsPromise;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/article/${slug}`,
+    { cache: "no-store" }
+  );
   if (!res.ok) {
     // fallback title if article is not found
-    const title = slug.replace(/_/g, " ")
-    return { title: `${title} - Williampedia` }
+    const title = slug.replace(/_/g, " ");
+    return { title: `${title} - Williampedia` };
   }
-  const article = await res.json()
+  const article = await res.json();
   return {
-    title: `${article.title} - Williampedia`
-  }
+    title: `${article.title} - Williampedia`,
+  };
 }
 
-export default async function ArticlePage({ params }: { params: ParamsPromise }) {
-  const { slug } = await params
+export default async function ArticlePage({
+  params,
+}: {
+  params: ParamsPromise;
+}) {
+  const { slug } = await params;
 
   try {
     // Ensure slug is available before using it
     if (!slug) {
-      return <div>Invalid article URL</div>
+      return <div>Invalid article URL</div>;
     }
 
     // Fetch both article and sequence data in parallel
     const [articleRes, sequenceRes] = await Promise.all([
-      fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/article/${slug}`, { 
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/article/${slug}`, {
         cache: "no-store",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       }),
-      fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/article-sequence/${slug}`, { 
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/article-sequence/${slug}`, {
         cache: "no-store",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-      })
+      }),
     ]);
 
     // Handle article not found
     if (!articleRes.ok) {
       if (articleRes.status === 404) {
-        return <div className="p-4 text-center">Article not found</div>
+        return <div className="p-4 text-center">Article not found</div>;
       }
       throw new Error(`Failed to fetch article: ${articleRes.statusText}`);
     }
 
     const article = await articleRes.json();
-    
+
     // Get the sequence data if available, with error handling
     let sequence = { previous: null, next: null };
     if (sequenceRes.ok) {
@@ -79,12 +90,18 @@ export default async function ArticlePage({ params }: { params: ParamsPromise })
               <div className="font-medium mb-2 text-[#54595d]">Navigation</div>
               <ul className="space-y-1">
                 <li>
-                  <Link href="/" className="text-[#36c] hover:text-[#447ff5] block py-1">
+                  <Link
+                    href="/"
+                    className="text-[#36c] hover:text-[#447ff5] block py-1"
+                  >
                     Main page
                   </Link>
                 </li>
                 <li>
-                  <Link href="/history" className="text-[#36c] hover:text-[#447ff5] block py-1">
+                  <Link
+                    href="/history"
+                    className="text-[#36c] hover:text-[#447ff5] block py-1"
+                  >
                     Recent changes
                   </Link>
                 </li>
@@ -97,12 +114,18 @@ export default async function ArticlePage({ params }: { params: ParamsPromise })
               <div className="font-medium mb-2 text-[#54595d]">Contribute</div>
               <ul className="space-y-1">
                 <li>
-                  <Link href="#" className="text-[#36c] hover:text-[#447ff5] block py-1">
+                  <Link
+                    href="#"
+                    className="text-[#36c] hover:text-[#447ff5] block py-1"
+                  >
                     Help
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" className="text-[#36c] hover:text-[#447ff5] block py-1">
+                  <Link
+                    href="#"
+                    className="text-[#36c] hover:text-[#447ff5] block py-1"
+                  >
                     About
                   </Link>
                 </li>
@@ -145,10 +168,16 @@ export default async function ArticlePage({ params }: { params: ParamsPromise })
                 </Button>
               </div>
               <div className="flex ml-auto">
-                <Button variant="ghost" className="rounded-none px-4 py-2 h-auto text-sm">
+                <Button
+                  variant="ghost"
+                  className="rounded-none px-4 py-2 h-auto text-sm"
+                >
                   Read
                 </Button>
-                <Button variant="ghost" className="rounded-none px-4 py-2 h-auto text-sm">
+                <Button
+                  variant="ghost"
+                  className="rounded-none px-4 py-2 h-auto text-sm"
+                >
                   Edit
                 </Button>
               </div>
@@ -164,7 +193,10 @@ export default async function ArticlePage({ params }: { params: ParamsPromise })
                   <div className="flex items-center gap-2">
                     <Badge variant="secondary">AI-Generated</Badge>
                     <span className="text-muted-foreground">
-                      Created on {article.createdAt ? new Date(article.createdAt).toLocaleDateString() : 'Unknown date'}
+                      Created on{" "}
+                      {article.createdAt
+                        ? new Date(article.createdAt).toLocaleDateString()
+                        : "Unknown date"}
                     </span>
                   </div>
                   <VoteButtons articleId={article.id} votes={article.votes} />
@@ -221,9 +253,9 @@ export default async function ArticlePage({ params }: { params: ParamsPromise })
           </main>
         </div>
       </div>
-    )
+    );
   } catch (error) {
-    console.error('Error loading article:', error);
+    console.error("Error loading article:", error);
     return (
       <div className="p-4 text-center">
         <p>Error loading article. Please try again later.</p>
