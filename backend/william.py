@@ -19,10 +19,10 @@ class write_article(BaseModel):
 
 class William:
 
-    def __init__(self, model_name="gpt-4o-mini", history_size=10):
+    def __init__(self, model_name="gpt-4o-mini", history_size=10, temperature=0.7):
         super().__init__()
 
-        self.llm = ChatOpenAI(model=model_name)
+        self.llm = ChatOpenAI(model=model_name, temperature=temperature)
 
         self.response_schemas = [
             ResponseSchema(name="topic", description="The main topic or title of the article"),
