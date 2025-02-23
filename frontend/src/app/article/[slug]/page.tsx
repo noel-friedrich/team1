@@ -8,6 +8,7 @@ import Markdown from "@/components/markdown";
 import Image from "next/image";
 import RandomArticleLink from "@/components/random-article-link";
 import SearchBox from "@/components/SearchBox";
+import { fallbackArticle } from "@/lib/fallback-article";
 
 type ParamsPromise = Promise<{ slug: string }>;
 
@@ -61,15 +62,8 @@ export default async function ArticlePage({
       }),
     ]);
 
-    // Handle article not found
-    if (!articleRes.ok) {
-      if (articleRes.status === 404) {
-        return <div className="p-4 text-center">Article not found</div>;
-      }
-      throw new Error(`Failed to fetch article: ${articleRes.statusText}`);
-    }
-
-    const article = await articleRes.json();
+    // Use fallback article if fetch fails
+    const article = articleRes.ok ? await articleRes.json() : fallbackArticle;
 
     // Get the sequence data if available, with error handling
     let sequence = { previous: null, next: null };
