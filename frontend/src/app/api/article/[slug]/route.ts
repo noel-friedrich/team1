@@ -5,20 +5,21 @@ import mongoose from "mongoose";
 
 export async function GET(
   req: Request,
-  context: { params: { slug: string } }
+  context: { params: Promise<{ slug: string }> }
 ) {
   try {
+    // Await the resolution of params
+    const { slug } = await context.params;
+
     await connectToDatabase();
-    
+
     const db = mongoose.connection.db;
     if (!db) {
       throw new Error('Database connection not established');
     }
-    
+
     // Log current database connection info
     console.log('Connected to database:', db.databaseName);
-    
-    const { slug } = context.params;
     console.log('Looking for article with slug:', slug);
 
     // List all collections in the database
@@ -38,7 +39,7 @@ export async function GET(
     }
 
     // Log success
-    // console.log('Successfully found article:', (article as any).title);
+    console.log('Successfully found article:', article.title);
     return NextResponse.json(article);
 
   } catch (error) {
