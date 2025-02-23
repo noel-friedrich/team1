@@ -1,10 +1,12 @@
 import * as React from "react"
 import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
 
 import { cn } from "@/lib/utils"
 import { ButtonProps, buttonVariants } from "@/components/ui/button"
 
-const Pagination = ({ className, ...props }: React.ComponentProps<"nav">) => (
+const PaginationRoot = ({ className, ...props }: React.ComponentProps<"nav">) => (
   <nav
     role="navigation"
     aria-label="pagination"
@@ -12,7 +14,7 @@ const Pagination = ({ className, ...props }: React.ComponentProps<"nav">) => (
     {...props}
   />
 )
-Pagination.displayName = "Pagination"
+PaginationRoot.displayName = "PaginationRoot"
 
 const PaginationContent = React.forwardRef<
   HTMLUListElement,
@@ -106,8 +108,54 @@ const PaginationEllipsis = ({
 )
 PaginationEllipsis.displayName = "PaginationEllipsis"
 
+interface PaginationProps {
+  currentPage: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+}
+
+export function Pagination({
+  currentPage,
+  totalPages,
+  hasNextPage,
+  hasPreviousPage,
+}: PaginationProps) {
+  return (
+    <div className="flex items-center gap-2">
+      <Button
+        variant="outline"
+        size="sm"
+        asChild
+        disabled={!hasPreviousPage}
+      >
+        <Link href={`?page=${currentPage - 1}`}>
+          <ChevronLeft className="h-4 w-4" />
+          Previous
+        </Link>
+      </Button>
+      
+      <div className="text-sm text-muted-foreground">
+        Page {currentPage} of {totalPages}
+      </div>
+      
+      <Button
+        variant="outline"
+        size="sm"
+        asChild
+        disabled={!hasNextPage}
+      >
+        <Link href={`?page=${currentPage + 1}`}>
+          Next
+          <ChevronRight className="h-4 w-4" />
+        </Link>
+      </Button>
+    </div>
+  );
+}
+
 export {
-  Pagination,
+  PaginationRoot,
   PaginationContent,
   PaginationLink,
   PaginationItem,

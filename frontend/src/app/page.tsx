@@ -1,6 +1,5 @@
 import WikiLogo from "@/components/wiki-logo";
 import Link from "next/link";
-import { articles } from "@/lib/data";
 import {
   Card,
   CardContent,
@@ -37,11 +36,11 @@ export default async function Home() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
           <div className="space-y-6">
-            <LanguageSection
+            {/* <LanguageSection
               title="Latest Articles"
               count={`${articles.length} articles`}
               href="/article/Neural_Networks_Explained"
-            />
+            /> */}
             <LanguageSection
               title="View History"
               count="See all changes"
