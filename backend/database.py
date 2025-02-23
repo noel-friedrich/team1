@@ -146,3 +146,8 @@ class Database:
         if len(matches) == 0:
             return "No articles with similar name found."
         return "\n".join(matches)
+    
+    def get_all_articles(self) -> list[Article]:
+        cursor = self.articles_collection.find("")
+        article_entries = list(cursor)
+        return [Article(e["title"], e["content"]) for e in article_entries]
