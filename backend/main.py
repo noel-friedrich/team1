@@ -3,6 +3,7 @@ from manager import Manager
 from secret_keys import TWITCH_KEY
 from video import VideoStreamer
 
+
 def main():
     man = Manager("gpt-4o-mini", upload_online=True)
     VIDEO_MODE = False
