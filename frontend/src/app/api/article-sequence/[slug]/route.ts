@@ -3,9 +3,13 @@ import { connectToDatabase } from "@/lib/mongodb";
 import Article from "@/models/Article";
 import mongoose from "mongoose";
 
+type Context = {
+  params: { slug: string }
+}
+
 export async function GET(
   request: Request,
-  context: { params: { slug: string } }
+  { params }: Context
 ) {
   try {
     await connectToDatabase();
@@ -18,7 +22,7 @@ export async function GET(
     // Log current database connection info
     console.log('Connected to database:', db.databaseName);
     
-    const { slug } = context.params;
+    const { slug } = params;
     console.log('Looking for article with slug:', slug);
 
     // List all collections in the database
