@@ -69,22 +69,9 @@ export default async function HistoryPage({
               <li>
                 <RandomArticleLink />
               </li>
-            </ul>
-          </div>
-          <div>
-            <div className="font-medium mb-2 text-[#54595d]">Contribute</div>
-            <ul className="space-y-1">
               <li>
                 <Link
-                  href="#"
-                  className="text-[#36c] hover:text-[#447ff5] block py-1"
-                >
-                  Help
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="#"
+                  href="/about"
                   className="text-[#36c] hover:text-[#447ff5] block py-1"
                 >
                   About
