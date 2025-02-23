@@ -27,7 +27,7 @@ export async function GET(
     console.log('Available collections:', collections.map(c => c.collectionName));
 
     // Find the article
-    const article = await Article.findOne({ slug }).lean().exec();
+    const article = await Article.findOne({ slug }).lean();
     console.log('Query result:', article);
 
     if (!article) {
@@ -45,8 +45,7 @@ export async function GET(
       })
       .sort({ createdAt: -1 })
       .select('slug title createdAt')
-      .lean()
-      .exec(),
+      .lean(),
 
       Article.findOne({
         createdAt: { $gt: article.createdAt }
@@ -54,7 +53,6 @@ export async function GET(
       .sort({ createdAt: 1 })
       .select('slug title createdAt')
       .lean()
-      .exec()
     ]);
 
     return NextResponse.json({
