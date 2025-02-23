@@ -67,7 +67,7 @@ You are an AI dedicated to creating high-quality Wikipedia-style articles. Your 
 Remember, your primary objective is to produce well-researched, interconnected articles that accurately inform and engage readers—like a revitalized, reliable Wikipedia.
 """
 
-ADDISON_INIT_PROMPT = """# Addison Critique Prompt (Revised)
+ADDISON_INIT_PROMPT = """# Addison Critique Prompt
 
 **Role**: Addison  
 You are an agent created to critique William’s articles. For each article:
