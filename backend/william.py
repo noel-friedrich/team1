@@ -36,7 +36,7 @@ class William:
 
         self.llm = self.llm.bind_tools([write_article], tool_choice="any")
 
-    def produce_article(self, messages) -> Optional[Article]:
+    def produce_article(self, messages):
         response = self.llm.invoke(messages)
         self.add_to_memory(response)
         tool_calls = response.tool_calls
@@ -55,7 +55,6 @@ class William:
                 self.add_to_memory(tool_message)
 
                 return article
-        return None
 
     def update_memory(self):
         while len(self.message_history) > self.history_size:
@@ -73,7 +72,7 @@ class William:
     def generate_new_article_prompt(self, feedback: str) -> str:
         return WILLIAM_WRITE_MORE_PROMPT(feedback)
 
-    def write_new_article(self, feedback: Optional[str]) -> Article:
+    def write_new_article(self, feedback: Optional[str]):
         # add prompt containing feedback and direction if we got feedback
         if feedback is not None:
             article_prompt = self.generate_new_article_prompt(feedback)
@@ -81,8 +80,4 @@ class William:
         else:
             self.update_memory()
 
-        article = self.produce_article(self.memory)
-        if article is not None:
-            return article
-        else:
-            assert False
+        return self.produce_article(self.memory)
