@@ -10,15 +10,14 @@ import Markdown from "@/components/markdown"
 import Image from "next/image"
 import RandomArticleLink from "@/components/random-article-link"
 
-type Props = {
-  params: { slug: string }
-}
+type ParamsPromise = Promise<{ slug: string }>
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/article/${params.slug}`, { cache: "no-store" })
+export async function generateMetadata({ params }: { params: ParamsPromise }): Promise<Metadata> {
+  const { slug } = await params
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/article/${slug}`, { cache: "no-store" })
   if (!res.ok) {
     // fallback title if article is not found
-    const title = params.slug.replace(/_/g, " ")
+    const title = slug.replace(/_/g, " ")
     return { title: `${title} - Williampedia` }
   }
   const article = await res.json()
@@ -27,22 +26,24 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export default async function ArticlePage({ params }: Props) {
+export default async function ArticlePage({ params }: { params: ParamsPromise }) {
+  const { slug } = await params
+
   try {
-    // Ensure params.slug is available before using it
-    if (!params?.slug) {
+    // Ensure slug is available before using it
+    if (!slug) {
       return <div>Invalid article URL</div>
     }
 
     // Fetch both article and sequence data in parallel
     const [articleRes, sequenceRes] = await Promise.all([
-      fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/article/${params.slug}`, { 
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/article/${slug}`, { 
         cache: "no-store",
         headers: {
           'Content-Type': 'application/json',
         },
       }),
-      fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/article-sequence/${params.slug}`, { 
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/article-sequence/${slug}`, { 
         cache: "no-store",
         headers: {
           'Content-Type': 'application/json',
