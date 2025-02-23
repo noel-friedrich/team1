@@ -4,3 +4,5 @@ backend/secret_keys.py
 backend/__pycache__
 articles.txt
 test_articles/
+.history
+/frontend/.env.local
