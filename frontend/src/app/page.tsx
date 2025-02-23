@@ -10,11 +10,20 @@ import {
 } from "@/components/ui/card";
 import SearchBox from "@/components/SearchBox";
 
-export default function Home() {
+export default async function Home() {
   // Get the latest article as "Article of the Day"
-  const articleOfTheDay = articles.sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  )[0];
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/article-of-the-day`,
+    {
+      cache: "no-store", // Disable caching to always get the latest
+    }
+  );
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch article of the day");
+  }
+
+  const articleOfTheDay = await res.json();
 
   return (
     <div className="min-h-screen bg-white font-serif">
@@ -47,7 +56,7 @@ export default function Home() {
           <div className="space-y-6">
             <Card className="border-2 border-primary/20">
               <CardHeader>
-                <CardTitle>Article of the Day</CardTitle>
+                <CardTitle>William's Latest Article</CardTitle>
                 <CardDescription>
                   {new Date(articleOfTheDay.createdAt).toLocaleDateString()}
                 </CardDescription>
