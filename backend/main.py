@@ -7,8 +7,7 @@ def main():
     man = Manager("gpt-4o-mini", upload_online=True)
     stream_video = False
     if not stream_video:
-        NUM_ITRS = 30
-        for _ in range(NUM_ITRS):
+        while True:
             man.get_next_article()
     else:
         # Replace with your actual streaming URL and stream key.
