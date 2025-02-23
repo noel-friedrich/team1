@@ -62,12 +62,12 @@ export default async function ArticlePage({
     ]);
 
     // Handle article not found
-    if (!articleRes.ok) {
-      if (articleRes.status === 404) {
-        return <div className="p-4 text-center">Article not found</div>;
-      }
-      throw new Error(`Failed to fetch article: ${articleRes.statusText}`);
-    }
+    // if (!articleRes.ok) {
+    //   if (articleRes.status === 404) {
+    //     return <div className="p-4 text-center">Article not found</div>;
+    //   }
+    //   throw new Error(`Failed to fetch article: ${articleRes.statusText}`);
+    // }
 
     const article = await articleRes.json();
 
