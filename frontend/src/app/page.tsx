@@ -56,7 +56,7 @@ export default async function Home() {
           <div className="space-y-6">
             <Card className="border-2 border-primary/20">
               <CardHeader>
-                <CardTitle>William's Latest Article</CardTitle>
+                <CardTitle>Williams Latest Article</CardTitle>
                 <CardDescription>
                   {new Date(articleOfTheDay.createdAt).toLocaleDateString()}
                 </CardDescription>
