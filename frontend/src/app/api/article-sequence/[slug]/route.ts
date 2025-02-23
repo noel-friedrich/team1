@@ -1,15 +1,11 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import Article from "@/models/Article";
 import mongoose from "mongoose";
 
-type Context = {
-  params: { slug: string }
-}
-
 export async function GET(
-  request: Request,
-  { params }: Context
+  request: NextRequest,
+  { params }: { params: { slug: string } }
 ) {
   try {
     await connectToDatabase();
