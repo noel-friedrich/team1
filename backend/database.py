@@ -33,8 +33,8 @@ class Database:
 
     def __init__(self, mongodb_address: str, debug_messages=False):
         self.mongodb_client = pymongo.MongoClient(mongodb_address)
-        self.db = self.mongodb_client["josh"]
-        self.articles_collection = self.db["wikis"]
+        self.db = self.mongodb_client["william"]
+        self.articles_collection = self.db["articles"]
         self.vectorizer = Vectorizer()
         self.debug_messages = debug_messages
         self.unsplash_client = UnsplashPhotoSearch()
