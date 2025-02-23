@@ -38,7 +38,7 @@ export async function GET(
     }
 
     // Log success
-    console.log('Successfully found article:', (article as any).title);
+    // console.log('Successfully found article:', (article as any).title);
     return NextResponse.json(article);
 
   } catch (error) {
