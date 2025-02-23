@@ -12,6 +12,9 @@ class Article:
         self.title = title
         self.content = content
 
+    def __hash__(self):
+        return hash(self.title)
+
 class Vectorizer:
 
     def __init__(self):
@@ -34,10 +37,17 @@ class Database:
         self.vectorizer = Vectorizer()
         self.debug_messages = debug_messages
 
+        self.backlink_opportunities: dict[Article, list[str]] = {}
+        self.all_possible_backlinks: set[str] = set()
+        self.reverse_backlink_map: dict[str, Article] = {}
+
         self.fake_db_dict = {}
 
-    def upload_article(self, article: Article):
+    def upload_article(self, article: Article, upload_online=True):
         self.fake_db_dict[article.title] = article.content
+
+        if not upload_online:
+            return
 
         title_embedding = self.vectorizer.get_embedding(article.title)
         content_embedding = self.vectorizer.get_embedding(article.content)
