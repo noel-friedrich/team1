@@ -7,7 +7,7 @@ def main():
     man = Manager("gpt-4o-mini")
     stream_video = False
     if not stream_video:
-        NUM_ITRS = 10
+        NUM_ITRS = 30
         for _ in range(NUM_ITRS):
             man.get_next_article()
     else:
