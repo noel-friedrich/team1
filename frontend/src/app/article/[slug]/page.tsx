@@ -72,7 +72,9 @@ export default async function ArticlePage({ params }: { params: ParamsPromise })
         {/* Sidebar with the Williampedia logo */}
         <aside className="w-[14rem] p-4 border-r min-h-screen text-[0.875rem] hidden lg:block">
           <div className="mb-6 flex items-center gap-2">
-            <span className="font-serif text-xl">Williampedia</span>
+            <Link href="/" className="hover:opacity-80">
+              <span className="font-serif text-xl">Williampedia</span>
+            </Link>
           </div>
           <nav className="space-y-6">
             <div>
@@ -208,6 +210,9 @@ export default async function ArticlePage({ params }: { params: ParamsPromise })
                         height={300}
                         className="w-full h-auto"
                       />
+                      <figcaption className="text-xs text-muted-foreground text-center mt-2">
+                        Image from Unsplash
+                      </figcaption>
                     </figure>
                   </div>
                 )}
