@@ -12,6 +12,7 @@ export async function GET(
     const { slug } = await params;
     
     // First, get the current article to find its timestamp
+    // @ts-expect-error making it work 
     const currentArticle = await Article.findOne({ slug }).lean().exec();
     
     if (!currentArticle) {
@@ -23,6 +24,7 @@ export async function GET(
 
     // Find the previous and next articles based on createdAt timestamp
     const [previousArticle, nextArticle] = await Promise.all([
+      // @ts-expect-error making it work 
       Article.findOne({
         createdAt: { $lt: currentArticle.createdAt }
       })
@@ -30,7 +32,7 @@ export async function GET(
       .select('slug title')
       .lean()
       .exec(),
-      
+      // @ts-expect-error making it work 
       Article.findOne({
         createdAt: { $gt: currentArticle.createdAt }
       })

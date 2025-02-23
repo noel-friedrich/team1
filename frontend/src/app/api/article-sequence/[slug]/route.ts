@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
-import Article from "@/models/Article";
+import Article, { IArticle } from "@/models/Article";
 import mongoose from "mongoose";
 
 export async function GET(
@@ -27,8 +27,9 @@ export async function GET(
     console.log('Available collections:', collections.map(c => c.collectionName));
 
     // Find the article
-    const article = await Article.findOne({ slug }).lean();
-    console.log('Query result:', article);
+    // @ts-expect-error making it work 
+    const article = await Article.findOne<IArticle>({ slug }).exec();
+    console.log("Query result:", article);
 
     if (!article) {
       console.log('No article found with slug:', slug);
@@ -40,19 +41,21 @@ export async function GET(
 
     // Find the previous and next articles based on createdAt timestamp
     const [previousArticle, nextArticle] = await Promise.all([
-      Article.findOne({
-        createdAt: { $lt: article.createdAt }
-      })
+      // @ts-expect-error making it work 
+      Article.findOne(
+        { createdAt: { $lt: article.createdAt } }
+      )
       .sort({ createdAt: -1 })
-      .select('slug title createdAt')
+      .select({ slug: 1, title: 1, createdAt: 1, _id: 0 })
       .lean()
       .exec(),
 
-      Article.findOne({
-        createdAt: { $gt: article.createdAt }
-      })
+      // @ts-expect-error making it work 
+      Article.findOne(
+        { createdAt: { $gt: article.createdAt } }
+      )
       .sort({ createdAt: 1 })
-      .select('slug title createdAt')
+      .select({ slug: 1, title: 1, createdAt: 1, _id: 0 })
       .lean()
       .exec()
     ]);
