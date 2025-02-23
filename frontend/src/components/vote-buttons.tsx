@@ -5,14 +5,14 @@ import { ThumbsDown, ThumbsUp } from "lucide-react"
 import { useState } from "react"
 
 type VoteButtonsProps = {
-  articleId: string
+  articleId?: string
   votes: {
     up: number
     down: number
   }
 }
 
-export default function VoteButtons({ articleId, votes: initialVotes }: VoteButtonsProps) {
+export default function VoteButtons({ votes: initialVotes }: VoteButtonsProps) {
   const [votes, setVotes] = useState(initialVotes)
 
   const handleVote = async (type: "up" | "down") => {

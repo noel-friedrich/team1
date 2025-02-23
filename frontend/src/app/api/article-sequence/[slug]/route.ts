@@ -1,24 +1,25 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import Article from "@/models/Article";
 import mongoose from "mongoose";
 
 export async function GET(
-  req: Request,
-  context: { params: { slug: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
+    // Await the resolution of params
+    const { slug } = await params;
+
     await connectToDatabase();
-    
+
     const db = mongoose.connection.db;
     if (!db) {
       throw new Error('Database connection not established');
     }
-    
+
     // Log current database connection info
     console.log('Connected to database:', db.databaseName);
-    
-    const { slug } = context.params;
     console.log('Looking for article with slug:', slug);
 
     // List all collections in the database
@@ -46,7 +47,7 @@ export async function GET(
       .select('slug title createdAt')
       .lean()
       .exec(),
-      
+
       Article.findOne({
         createdAt: { $gt: article.createdAt }
       })
@@ -75,10 +76,10 @@ export async function GET(
     });
 
   } catch (error) {
-    console.error("Error in GET /api/article-sequence/[id]:", error);
+    console.error("Error in GET /api/article-sequence/[slug]:", error);
     return NextResponse.json(
       { error: "Internal Server Error", details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }
-} 
+}
