@@ -4,14 +4,17 @@ from openai import OpenAI
 from slugify import slugify
 from datetime import datetime
 from unsplash_client import UnsplashPhotoSearch
+from bson.objectid import ObjectId
 
 print(pymongo.__version__, pymongo.__file__)
 
 class Article:
 
-    def __init__(self, title, content):
+    def __init__(self, title, content, uid=None, backlinks=None):
         self.title = title
         self.content = content
+        self.uid = uid
+        self.backlinks = backlinks
 
     def __hash__(self):
         return hash(self.title)
@@ -150,4 +153,11 @@ class Database:
     def get_all_articles(self) -> list[Article]:
         cursor = self.articles_collection.find("")
         article_entries = list(cursor)
-        return [Article(e["title"], e["content"]) for e in article_entries]
+        return [Article(e["title"], e["content"], e["_id"], e["backlinks"] if "backlinks" in e else "") for e in article_entries]
+    
+    def update_article_backlinks(self, article_id, backlinks):
+        backlink_str = ",".join(":".join((str(b1), str(b2))) for b1, b2 in backlinks.items())
+        self.articles_collection.update_one(
+            {"_id": ObjectId(article_id)},
+            {"$set": {"backlinks": backlink_str}}
+        )
