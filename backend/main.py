@@ -5,7 +5,7 @@ from database import Database
 
 database = Database(MONGODB_ADDRESS)
 
-william = William(model_name="o3-mini", history_size=10, temperature=0.7)
+william = William(model_name="gpt-4o-mini", history_size=10, temperature=0.7)
 addison = Addison(model_name="gpt-4o-mini")
 
 num_articles = 100
