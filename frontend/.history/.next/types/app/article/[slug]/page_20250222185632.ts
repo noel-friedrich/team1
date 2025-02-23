@@ -4,7 +4,7 @@ import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadat
 
 type TEntry = typeof import('../../../../../src/app/prev-next-article/[slug]/page.jsx')
 
-type SegmentParams<T extends Object = any> = T extends Record<string, any>
+type SegmentParams<T extends object = any> = T extends Record<string, any>
   ? { [K in keyof T]: T[K] extends string ? string | string[] | undefined : never }
   : T
 
