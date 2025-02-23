@@ -155,7 +155,7 @@ export default async function ArticlePage({
                   Article
                 </Button>
               </div>
-              <div className="flex ml-auto">
+              {/* <div className="flex ml-auto">
                 <Button
                   variant="ghost"
                   className="rounded-none px-4 py-2 h-auto text-sm"
@@ -168,7 +168,7 @@ export default async function ArticlePage({
                 >
                   Edit
                 </Button>
-              </div>
+              </div> */}
             </div>
           </div>
 

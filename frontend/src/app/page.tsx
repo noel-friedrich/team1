@@ -29,7 +29,7 @@ export default async function Home() {
       <div className="max-w-5xl mx-auto px-4 py-8">
         <div className="text-center mb-4">
           <h1 className="text-[2.8rem] leading-tight mb-1">
-            <span className="text-[3.2rem]">W</span>ILLIPEDI<span className="text-[3.2rem]">A</span>
+            <span className="text-[3.2rem]">W</span>ILLIAMPEDI<span className="text-[3.2rem]">A</span>
           </h1>
           <p className="text-[1.5rem] text-[#54595d]">
             The AI-Generated Encyclopedia
