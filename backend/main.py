@@ -4,7 +4,7 @@ from video import VideoStreamer
 
 
 def main():
-    man = Manager("gpt-4o-mini")
+    man = Manager("gpt-4o-mini", upload_online=True)
     stream_video = False
     if not stream_video:
         NUM_ITRS = 30
