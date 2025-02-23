@@ -45,7 +45,8 @@ export async function GET(
       })
       .sort({ createdAt: -1 })
       .select('slug title createdAt')
-      .lean(),
+      .lean()
+      .exec(),
 
       Article.findOne({
         createdAt: { $gt: article.createdAt }
@@ -53,6 +54,7 @@ export async function GET(
       .sort({ createdAt: 1 })
       .select('slug title createdAt')
       .lean()
+      .exec()
     ]);
 
     return NextResponse.json({
