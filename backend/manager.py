@@ -10,8 +10,11 @@ from william import William
 # Create test_articles directory if it doesn't exist
 os.makedirs("test_articles", exist_ok=True)
 
+
 class Manager:
-    def __init__(self, model_name="gpt-4o-mini"):
+    def __init__(self, model_name="gpt-4o-mini", upload_online=False):
+        self.upload_online = upload_online
+
         # init models
         self.william = William(model_name=model_name, history_size=3, temperature=0.85)
         self.brandon = Brandon(model_name=model_name, temperature=0.7)
@@ -47,7 +50,7 @@ class Manager:
         assert article is not None
         # export output
         print(f"William wrote about: {article.title!r}")
-        self.database.upload_article(article, upload_online=False)
+        self.database.upload_article(article, upload_online=self.upload_online)
         print(
             f"Addison accepted and Brandon suggested {len(backlinks_opportunities)} topics.",
             end="\n" * 2,
