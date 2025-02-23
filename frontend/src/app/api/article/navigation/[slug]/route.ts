@@ -1,15 +1,15 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import Article from "@/models/Article";
 
 export async function GET(
-  req: Request,
-  context: { params: { slug: string } }
+  req: NextRequest,
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
     await connectToDatabase();
     
-    const { slug } = context.params;
+    const { slug } = await params;
     
     // First, get the current article to find its timestamp
     const currentArticle = await Article.findOne({ slug }).lean().exec();
