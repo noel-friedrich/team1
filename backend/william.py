@@ -1,15 +1,10 @@
+from database import Article
 from langchain.output_parsers import ResponseSchema, StructuredOutputParser
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain_openai import ChatOpenAI
-from langchain.chains import create_extraction_chain
-from pydantic import BaseModel, Field
 from langchain_core.messages import HumanMessage, SystemMessage, ToolMessage
-from langgraph.graph import START, MessagesState, StateGraph
+from langchain_openai import ChatOpenAI
+from prompts import WILLIAM_INIT_PROMPT, WILLIAM_WRITE_MORE_PROMPT
 from pydantic import BaseModel, Field
 
-from database import Article
-from typing import TypedDict
-from prompts import WILLIAM_INIT_PROMPT, WILLIAM_WRITE_MORE_PROMPT
 
 class write_article(BaseModel):
     """Write a new article and upload it to the Williampedia"""
@@ -17,22 +12,26 @@ class write_article(BaseModel):
     title: str = Field(..., description="title text of the article")
     content: str = Field(..., description="body text of the article")
 
-class William:
 
+class William:
     def __init__(self, model_name="gpt-4o-mini", history_size=10, temperature=0.7):
         super().__init__()
 
         self.llm = ChatOpenAI(model=model_name, temperature=temperature)
 
         self.response_schemas = [
-            ResponseSchema(name="topic", description="The main topic or title of the article"),
-            ResponseSchema(name="content", description="The full article content")
+            ResponseSchema(
+                name="topic", description="The main topic or title of the article"
+            ),
+            ResponseSchema(name="content", description="The full article content"),
         ]
-        self.output_parser = StructuredOutputParser.from_response_schemas(self.response_schemas)
+        self.output_parser = StructuredOutputParser.from_response_schemas(
+            self.response_schemas
+        )
 
         self.history_size = history_size
         self.message_history = []
-        
+
         self.llm = self.llm.bind_tools([write_article], tool_choice="any")
 
     def produce_article(self, messages) -> Article:
@@ -42,14 +41,14 @@ class William:
         for call in tool_calls:
             if call["name"] == "write_article":
                 article = Article(call["args"]["title"], call["args"]["content"])
-                
+
                 # openai forces us to supply toolmessage after an aimessage that uses
                 # a tool, hence we manually insert an answer into memory
                 tool_message = ToolMessage(
-                    role='tool',
+                    role="tool",
                     content='{"result":"success"}',
                     name=call["name"],
-                    tool_call_id=call["id"]
+                    tool_call_id=call["id"],
                 )
                 self.add_to_memory(tool_message)
 
@@ -61,7 +60,7 @@ class William:
 
         self.memory = [
             SystemMessage(content=WILLIAM_INIT_PROMPT),
-            *self.message_history
+            *self.message_history,
         ]
 
     def add_to_memory(self, message):
@@ -80,3 +79,4 @@ class William:
             self.update_memory()
 
         return self.produce_article(self.memory)
+

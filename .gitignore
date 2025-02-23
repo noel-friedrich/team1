@@ -2,3 +2,4 @@
 .env
 backend/secret_keys.py
 backend/__pycache__
+articles.txt
