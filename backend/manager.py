@@ -7,6 +7,8 @@ from database import Article, Database
 from secret_keys import *
 from william import William
 
+# Create test_articles directory if it doesn't exist
+os.makedirs("test_articles", exist_ok=True)
 
 class Manager:
     def __init__(self, model_name="gpt-4o-mini"):

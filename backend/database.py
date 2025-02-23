@@ -3,6 +3,7 @@ from pymongo.operations import SearchIndexModel
 from openai import OpenAI
 from slugify import slugify
 from datetime import datetime
+from unsplash_client import UnsplashPhotoSearch
 
 print(pymongo.__version__, pymongo.__file__)
 
@@ -36,6 +37,7 @@ class Database:
         self.articles_collection = self.db["wikis"]
         self.vectorizer = Vectorizer()
         self.debug_messages = debug_messages
+        self.unsplash_client = UnsplashPhotoSearch()
 
         self.backlink_opportunities: dict[Article, list[str]] = {}
         self.all_possible_backlinks: set[str] = set()
@@ -52,11 +54,22 @@ class Database:
         title_embedding = self.vectorizer.get_embedding(article.title)
         content_embedding = self.vectorizer.get_embedding(article.content)
         
+        try:
+            image_url = self.unsplash_client.search_photos(article.title)
+            if not image_url:
+                image_url = "https://picsum.photos/200"
+                if self.debug_messages:
+                    print(f"No Unsplash image found for '{article.title}', using fallback")
+        except Exception as e:
+            print(f"Error getting Unsplash image for '{article.title}': {e}")
+            image_url = "https://picsum.photos/200"
+        
+        
         article_data = {
             "title": article.title,
             "content": article.content,
             "slug": slugify(article.title) or f"untitled-{datetime.now()}",
-            "image_url": "https://picsum.photos/200",
+            "image_url": image_url,
             "createdAt": datetime.now(),
             "metadata": {
                 "model": "gpt-4o-mini",
@@ -67,6 +80,7 @@ class Database:
             "title_embedding": title_embedding,
             "content_embedding": content_embedding
         }
+
 
         self.upload_article_data(article_data)
 
