@@ -2,6 +2,7 @@ from secret_keys import *
 from william import William
 from addison import Addison
 from database import Database
+# import os
 
 database = Database(MONGODB_ADDRESS, debug_messages=False)
 
@@ -21,3 +22,6 @@ for i in range(num_articles):
     else:
         database.upload_article(article)
         print(f"Allison responded: {feedback}", end="\n" * 2)
+
+        # with open(os.path.join("test_articles", f"{article.title}.md"), "w", encoding="utf-8") as file:
+        #     file.write(article.content)
