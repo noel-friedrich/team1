@@ -4,8 +4,8 @@ import Article from "@/models/Article";
 import mongoose from "mongoose";
 
 export async function GET(
-  req: Request,
-  { params }: { params: { slug: string } }
+  request: Request,
+  context: { params: { slug: string } }
 ) {
   try {
     await connectToDatabase();
@@ -18,7 +18,7 @@ export async function GET(
     // Log current database connection info
     console.log('Connected to database:', db.databaseName);
     
-    const { slug } = params;
+    const { slug } = context.params;
     console.log('Looking for article with slug:', slug);
 
     // List all collections in the database
