@@ -1,7 +1,5 @@
 import Link from "next/link";
-import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import type { Metadata } from "next";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -9,6 +7,7 @@ import VoteButtons from "@/components/vote-buttons";
 import Markdown from "@/components/markdown";
 import Image from "next/image";
 import RandomArticleLink from "@/components/random-article-link";
+import SearchBox from "@/components/SearchBox";
 
 type ParamsPromise = Promise<{ slug: string }>;
 
@@ -139,20 +138,7 @@ export default async function ArticlePage({
           {/* Top Bar: Search bar */}
           <nav className="border-b">
             <div className="max-w-[960px] mx-auto px-4 flex justify-center items-center h-14">
-              <div className="relative w-full max-w-xl">
-                <Input
-                  type="search"
-                  placeholder="Search Williampedia"
-                  className="w-full pl-4 pr-10"
-                />
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="absolute right-2 top-1/2 -translate-y-1/2"
-                >
-                  <Search className="h-4 w-4" />
-                </Button>
-              </div>
+              <SearchBox />
             </div>
           </nav>
 
