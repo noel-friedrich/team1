@@ -9,6 +9,7 @@ import { Card } from "@/components/ui/card"
 import VoteButtons from "@/components/vote-buttons"
 import Markdown from "@/components/markdown"
 import Image from "next/image"
+import RandomArticleLink from "@/components/random-article-link"
 
 type Props = {
   params: { slug: string }
@@ -88,9 +89,7 @@ export default async function ArticlePage({ params }: Props) {
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" className="text-[#36c] hover:text-[#447ff5] block py-1">
-                    Random article
-                  </Link>
+                  <RandomArticleLink />
                 </li>
               </ul>
             </div>
